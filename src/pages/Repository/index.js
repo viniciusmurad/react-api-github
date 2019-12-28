@@ -5,17 +5,24 @@ import api from '../../services/api';
 
 import Container from '../../components/Container';
 
-import { Loading, Owner, IssueList } from './styles';
+import { Loading, Owner, IssueList, SelectFilter } from './styles';
 
 export default class Repository extends Component {
     state = {
         repository: {},
         issues: [],
+        filters: [
+            { state: 'all', label: 'All', active: true },
+            { state: 'open', label: 'Open', active: false },
+            { state: 'closed', label: 'Closed', active: false },
+        ],
+        // filterLabel: 'all',
         loading: true,
     };
 
     async componentDidMount() {
         const { match } = this.props;
+        const { filters } = this.state;
 
         const repoName = decodeURIComponent(match.params.repository);
 
@@ -23,8 +30,8 @@ export default class Repository extends Component {
             api.get(`/repos/${repoName}`),
             api.get(`/repos/${repoName}/issues`, {
                 params: {
-                    state: 'open',
-                    per_page: 5,
+                    state: filters[0].state,
+                    per_page: 10,
                 },
             }),
         ]);
@@ -36,8 +43,42 @@ export default class Repository extends Component {
         });
     }
 
+    changeSelectFilter = e => {
+        const { filters } = this.state;
+        filters.forEach(f => {
+            if (f.state === e.target.value.toLowerCase()) {
+                f.active = true;
+            } else {
+                f.active = false;
+            }
+        });
+
+        this.setState({
+            filters,
+            // filterLabel: e.target.value.toLowerCase(),
+        });
+
+        this.loadIssues(e.target.value.toLowerCase());
+    };
+
+    loadIssues = async filter => {
+        const { match } = this.props;
+        const repoName = decodeURIComponent(match.params.repository);
+
+        const issues = await Promise.all([
+            api.get(`/repos/${repoName}/issues`, {
+                params: {
+                    state: filter,
+                    per_page: 10,
+                },
+            }),
+        ]);
+
+        this.setState({ issues: issues.data });
+    };
+
     render() {
-        const { repository, issues, loading } = this.state;
+        const { repository, issues, loading, filters } = this.state;
 
         if (loading) {
             return <Loading>Loading...</Loading>;
@@ -53,6 +94,12 @@ export default class Repository extends Component {
                     <h1>{repository.name}</h1>
                     <p>{repository.description}</p>
                 </Owner>
+
+                <SelectFilter onChange={this.changeSelectFilter}>
+                    {filters.map(filter => (
+                        <option key={filter.state}>{filter.label}</option>
+                    ))}
+                </SelectFilter>
 
                 <IssueList>
                     {issues.map(issue => (

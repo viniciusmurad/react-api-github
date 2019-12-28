@@ -13,6 +13,7 @@ export default class Main extends Component {
         newRepo: '',
         repositories: [],
         loading: false,
+        isInvalid: false,
     };
 
     componentDidMount() {
@@ -31,7 +32,7 @@ export default class Main extends Component {
     }
 
     handleInputChange = e => {
-        this.setState({ newRepo: e.target.value });
+        this.setState({ newRepo: e.target.value, isInvalid: false });
     };
 
     handleSubmit = async e => {
@@ -39,23 +40,36 @@ export default class Main extends Component {
 
         this.setState({ loading: true });
 
-        const { newRepo, repositories } = this.state;
+        try {
+            const { newRepo, repositories } = this.state;
 
-        const response = await api.get(`/repos/${newRepo}`);
+            if (newRepo === '') throw new Error('You must enter a value.');
 
-        const data = {
-            name: response.data.full_name,
-        };
+            const isDuplicated = repositories.find(r => r.name === newRepo);
 
-        this.setState({
-            repositories: [...repositories, data],
-            newRepo: '',
-            loading: false,
-        });
+            if (isDuplicated) throw new Error('Duplicated repository.');
+
+            const response = await api.get(`/repos/${newRepo}`);
+
+            const data = {
+                name: response.data.full_name,
+            };
+
+            this.setState({
+                repositories: [...repositories, data],
+                newRepo: '',
+                loading: false,
+            });
+        } catch (err) {
+            this.setState({
+                loading: false,
+                isInvalid: true,
+            });
+        }
     };
 
     render() {
-        const { newRepo, repositories, loading } = this.state;
+        const { newRepo, repositories, loading, isInvalid } = this.state;
 
         return (
             <Container>
@@ -64,7 +78,7 @@ export default class Main extends Component {
                     Repositories
                 </h1>
 
-                <Form onSubmit={this.handleSubmit}>
+                <Form onSubmit={this.handleSubmit} isInvalid={isInvalid}>
                     <input
                         type="text"
                         placeholder="Add a repository"

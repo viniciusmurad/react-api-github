@@ -12,6 +12,14 @@ export const Form = styled.form`
         border-radius: 4px;
         font-size: 16px;
     }
+
+    ${props =>
+        props.isInvalid &&
+        css`
+            input {
+                border: 1px solid red;
+            }
+        `}
 `;
 
 const rotate = keyframes`
@@ -28,7 +36,7 @@ export const SubmitButton = styled.button.attrs(props => ({
     type: 'submit',
     disabled: props.loading,
 }))`
-    background: #7159c1;
+    background: #4d80e4;
     border: 0;
     padding: 0 15px;
     margin-left: 10px;
@@ -67,7 +75,7 @@ export const List = styled.ul`
         }
 
         a {
-            color: #7159c1;
+            color: #4d80e4;
             text-decoration: none;
         }
     }

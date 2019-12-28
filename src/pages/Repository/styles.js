@@ -16,7 +16,7 @@ export const Owner = styled.header`
     align-items: center;
 
     a {
-        color: #7159c1;
+        color: #4d80e4;
         font-size: 16px;
         text-decoration: none;
     }
@@ -77,7 +77,7 @@ export const IssueList = styled.ul`
                     color: #333;
 
                     &:hover {
-                        color: #7159c1;
+                        color: #4d80e4;
                     }
                 }
 
@@ -100,4 +100,14 @@ export const IssueList = styled.ul`
             }
         }
     }
+`;
+
+export const SelectFilter = styled.select`
+    margin-top: 20px;
+    width: 100%;
+    height: 35px;
+    background: white;
+    border: 1px solid #eee;
+    font-size: 16px;
+    color: gray;
 `;
